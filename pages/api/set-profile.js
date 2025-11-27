@@ -32,18 +32,23 @@ export default async (req, res) => {
   // Get country from IP if not automated
   if (!isAutomated) {
     try {
-      const geoResponse = await axios.get(`https://ip.hackclub.com/ip/${clientIp}`);
-      const country = geoResponse.data.country_name || 'Unknown';
-      // Check multiple indicators for VPN/proxy
-      const isVPN = geoResponse.data.is_anonymous_proxy || 
-                    geoResponse.data.is_satellite_provider ||
-                    (geoResponse.data.isp_name && 
-                     (geoResponse.data.isp_name.toLowerCase().includes('vpn') ||
-                      geoResponse.data.isp_name.toLowerCase().includes('proxy') ||
-                      geoResponse.data.isp_name.toLowerCase().includes('hosting')));
+      // Use ipinfo.io for IP geolocation and VPN detection
+      const geoResponse = await axios.get(`https://ipinfo.io/${clientIp}/json`);
+      const country = geoResponse.data.country || 'Unknown';
+      // ipinfo.io includes 'privacy' field for VPN/proxy/hosting detection
+      const isVPN = geoResponse.data.privacy?.vpn || 
+                    geoResponse.data.privacy?.proxy || 
+                    geoResponse.data.privacy?.tor || 
+                    geoResponse.data.privacy?.hosting || false;
       location = isVPN ? `${country} (VPN)` : country;
     } catch (error) {
-      location = 'Unknown';
+      // Fallback to Hack Club IP API if ipinfo fails
+      try {
+        const fallbackResponse = await axios.get(`https://ip.hackclub.com/ip/${clientIp}`);
+        location = fallbackResponse.data.country_name || 'Unknown';
+      } catch {
+        location = 'Unknown';
+      }
     }
   }
   
