@@ -5,33 +5,33 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Sam Poder's Profile Picture</title>
+        <title>lynn's pfp</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
         <img src='/api/current/' className={styles.avatar} />
         <h1 className={styles.title + ' header-title-name'}>
-          Sam Poder
+          lynn beato
         </h1>
         <div className={styles.grid}>
           <a
             href={"/api/photo" }
             className={styles.card + ' post'}
           >
-            <h3>Get a random image &rarr;</h3>
-            <p>I don't know why you would want it, but you can have it.</p>
+            <h3>pull a random image &rarr;</h3>
+            <p>idk why you want ts but you can have it</p>
           </a>
           <a
             href={"/api/set-profile"}
             className={styles.card + ' post'}
           >
-            <h3>Change my avatar &rarr;</h3>
-            <p>Changes on the Hack Club Slack. Have fun with it!</p>
+            <h3>change my pfp &rarr;</h3>
+            <p>changes my pfp on the hack club slack, have fun with it!</p>
           </a>
         </div>
       </main>
       <footer className={styles.footer}>
-        <a href="https://github.com/sampoder/pfp">Hi there!! I'm open source!</a>
+        <a href="https://github.com/whatbeato/pfp">source code here</a>
       </footer>
     </div>
   );
