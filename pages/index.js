@@ -1,7 +1,17 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
+import { useState, useEffect } from 'react'
 
 export default function Home() {
+  const [lastLocation, setLastLocation] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/last-changer')
+      .then(res => res.json())
+      .then(data => setLastLocation(data.location))
+      .catch(() => setLastLocation(null));
+  }, []);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -13,6 +23,11 @@ export default function Home() {
         <h1 className={styles.title + ' header-title-name'}>
           lynn beato
         </h1>
+        {lastLocation && (
+          <p style={{ marginBottom: '2rem', color: '#666' }}>
+            last person that changed my pfp was based in <strong>{lastLocation}</strong>
+          </p>
+        )}
         <div className={styles.grid}>
           <a
             href={"/api/photo" }

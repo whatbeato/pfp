@@ -16,6 +16,49 @@ export const config = {
 };
 
 export default async (req, res) => {
+  const db = getRedis();
+  
+  // Get client IP
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || 
+                   req.headers['x-real-ip'] || 
+                   req.connection.remoteAddress;
+  
+  // Check if it's an automated IP
+  const automatedIPs = ['94.198.41.230', '37.120.212.158', '146.70.146.182', '37.120.155.138'];
+  const isAutomated = automatedIPs.includes(clientIp);
+  
+  let location = 'Automated';
+  
+  // Get country from IP if not automated
+  if (!isAutomated) {
+    try {
+      const geoResponse = await axios.get(`http://ip-api.com/json/${clientIp}?fields=country`);
+      location = geoResponse.data.country || 'Unknown';
+    } catch (error) {
+      location = 'Unknown';
+    }
+  }
+  
+  // Check rate limit (2 minutes = 120 seconds) - skip for automated IPs
+  if (!isAutomated) {
+    const lastRun = await db.get('last_profile_change');
+    const now = Date.now();
+    
+    if (lastRun) {
+      const timeSinceLastRun = (now - parseInt(lastRun)) / 1000; // seconds
+      if (timeSinceLastRun < 120) {
+        const waitTime = Math.ceil(120 - timeSinceLastRun);
+        return res.status(429).json({ 
+          error: 'Rate limit exceeded',
+          message: `Please wait ${waitTime} seconds before changing profile picture again`,
+          retryAfter: waitTime
+        });
+      }
+    }
+  }
+  
+  const now = Date.now();
+  
   const client = new WebClient();
   const context = require.context('../../public/images', true)
   let photos = context.keys()
@@ -31,8 +74,10 @@ export default async (req, res) => {
     image: squareImageBuffer,
     token: process.env.SLACK_TOKEN,
   });
-  const db = getRedis();
+  
   await db.set('image', photo);
+  await db.set('last_profile_change', now.toString());
+  await db.set('last_changer_location', location);
   fetch(`https://internal.hackclub.com/team/?token=${process.env.TEAM_SECRET}`, { method: "POST" });
   res.redirect('https://pfp.lynn.pt');
 };
