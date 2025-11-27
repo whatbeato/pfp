@@ -47,6 +47,8 @@ export default function Home() {
       </main>
       <footer className={styles.footer}>
         <a href="https://github.com/whatbeato/pfp">source code here</a>
+        {' • '}
+        <a href="/privacy">privacy policy</a>
       </footer>
     </div>
   );
