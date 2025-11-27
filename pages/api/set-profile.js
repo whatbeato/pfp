@@ -31,10 +31,6 @@ export default async (req, res) => {
     image: squareImageBuffer,
     token: process.env.SLACK_TOKEN,
   });
-  const calHacksSlackRequest = await client.users.setPhoto({
-    image: squareImageBuffer,
-    token: process.env.CAL_HACKS_SLACK_TOKEN,
-  });
   const db = getRedis();
   await db.set('image', photo);
   fetch(`https://internal.hackclub.com/team/?token=${process.env.TEAM_SECRET}`, { method: "POST" });
