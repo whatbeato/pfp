@@ -1,7 +1,15 @@
-const axios = require("axios").default;
-const S1 = require('s1db')
-const db = new S1(process.env.S1_TOKEN)
+const Redis = require('ioredis');
 
-export default  async (req, res) => {
-  res.redirect(await db.get('image'))
+let redis;
+function getRedis() {
+  if (!redis) {
+    redis = new Redis(process.env.REDIS_URL);
+  }
+  return redis;
+}
+
+export default async (req, res) => {
+  const db = getRedis();
+  const image = await db.get('image');
+  res.redirect(image || 'https://pfp.lynn.pt');
 };
