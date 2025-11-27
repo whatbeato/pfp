@@ -28,26 +28,17 @@ export default async (req, res) => {
   const isAutomated = automatedIPs.includes(clientIp);
   
   let location = 'Automated';
+  let isp = 'N/A';
   
   // Get country from IP if not automated
   if (!isAutomated) {
     try {
-      // Use vpnapi.io for IP geolocation and VPN detection (free tier: 1000 req/day)
-      const geoResponse = await axios.get(`https://vpnapi.io/api/${clientIp}?key=free`);
-      const country = geoResponse.data.location?.country || 'Unknown';
-      const isVPN = geoResponse.data.security?.vpn || 
-                    geoResponse.data.security?.proxy || 
-                    geoResponse.data.security?.tor || 
-                    geoResponse.data.security?.relay || false;
-      location = isVPN ? `${country} (VPN)` : country;
+      const geoResponse = await axios.get(`https://ip.hackclub.com/ip/${clientIp}`);
+      location = geoResponse.data.country_name || 'Unknown';
+      isp = geoResponse.data.isp_name || 'Unknown';
     } catch (error) {
-      // Fallback to Hack Club IP API if vpnapi fails
-      try {
-        const fallbackResponse = await axios.get(`https://ip.hackclub.com/ip/${clientIp}`);
-        location = fallbackResponse.data.country_name || 'Unknown';
-      } catch {
-        location = 'Unknown';
-      }
+      location = 'Unknown';
+      isp = 'Unknown';
     }
   }
   
@@ -86,6 +77,13 @@ export default async (req, res) => {
     image: squareImageBuffer,
     token: process.env.SLACK_TOKEN,
   });
+  
+  // Extract filename from photo URL
+  const filename = photo.split('/').pop();
+  
+  // Log the change
+  const automatedTag = isAutomated ? ' (AUTOMATED)' : '';
+  console.log(`PFP changed to ${filename}, from ${location}, ISP: ${isp}${automatedTag}`);
   
   await db.set('image', photo);
   await db.set('last_profile_change', now.toString());
