@@ -32,17 +32,16 @@ export default async (req, res) => {
   // Get country from IP if not automated
   if (!isAutomated) {
     try {
-      // Use ipinfo.io for IP geolocation and VPN detection
-      const geoResponse = await axios.get(`https://ipinfo.io/${clientIp}/json`);
-      const country = geoResponse.data.country || 'Unknown';
-      // ipinfo.io includes 'privacy' field for VPN/proxy/hosting detection
-      const isVPN = geoResponse.data.privacy?.vpn || 
-                    geoResponse.data.privacy?.proxy || 
-                    geoResponse.data.privacy?.tor || 
-                    geoResponse.data.privacy?.hosting || false;
+      // Use vpnapi.io for IP geolocation and VPN detection (free tier: 1000 req/day)
+      const geoResponse = await axios.get(`https://vpnapi.io/api/${clientIp}?key=free`);
+      const country = geoResponse.data.location?.country || 'Unknown';
+      const isVPN = geoResponse.data.security?.vpn || 
+                    geoResponse.data.security?.proxy || 
+                    geoResponse.data.security?.tor || 
+                    geoResponse.data.security?.relay || false;
       location = isVPN ? `${country} (VPN)` : country;
     } catch (error) {
-      // Fallback to Hack Club IP API if ipinfo fails
+      // Fallback to Hack Club IP API if vpnapi fails
       try {
         const fallbackResponse = await axios.get(`https://ip.hackclub.com/ip/${clientIp}`);
         location = fallbackResponse.data.country_name || 'Unknown';
