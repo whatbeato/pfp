@@ -32,8 +32,10 @@ export default async (req, res) => {
   // Get country from IP if not automated
   if (!isAutomated) {
     try {
-      const geoResponse = await axios.get(`http://ip-api.com/json/${clientIp}?fields=country`);
-      location = geoResponse.data.country || 'Unknown';
+      const geoResponse = await axios.get(`https://ip.hackclub.com/ip/${clientIp}`);
+      const country = geoResponse.data.country_name || 'Unknown';
+      const isVPN = geoResponse.data.is_anonymous_proxy || false;
+      location = isVPN ? `${country} (VPN)` : country;
     } catch (error) {
       location = 'Unknown';
     }
@@ -50,7 +52,7 @@ export default async (req, res) => {
         const waitTime = Math.ceil(120 - timeSinceLastRun);
         return res.status(429).json({ 
           error: 'Rate limit exceeded',
-          message: `Please wait ${waitTime} seconds before changing profile picture again`,
+          message: `woah woah woah you're going too fast! slow down! try again in ${waitTime} seconds`,
           retryAfter: waitTime
         });
       }
@@ -78,6 +80,5 @@ export default async (req, res) => {
   await db.set('image', photo);
   await db.set('last_profile_change', now.toString());
   await db.set('last_changer_location', location);
-  fetch(`https://internal.hackclub.com/team/?token=${process.env.TEAM_SECRET}`, { method: "POST" });
   res.redirect('https://pfp.lynn.pt');
 };
