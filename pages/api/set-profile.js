@@ -34,7 +34,13 @@ export default async (req, res) => {
     try {
       const geoResponse = await axios.get(`https://ip.hackclub.com/ip/${clientIp}`);
       const country = geoResponse.data.country_name || 'Unknown';
-      const isVPN = geoResponse.data.is_anonymous_proxy || false;
+      // Check multiple indicators for VPN/proxy
+      const isVPN = geoResponse.data.is_anonymous_proxy || 
+                    geoResponse.data.is_satellite_provider ||
+                    (geoResponse.data.isp_name && 
+                     (geoResponse.data.isp_name.toLowerCase().includes('vpn') ||
+                      geoResponse.data.isp_name.toLowerCase().includes('proxy') ||
+                      geoResponse.data.isp_name.toLowerCase().includes('hosting')));
       location = isVPN ? `${country} (VPN)` : country;
     } catch (error) {
       location = 'Unknown';
