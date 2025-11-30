@@ -1,6 +1,6 @@
 # 🎩 Profile pictures! (featuring Redis!)
 
-The previous version of this, made by [sampoder](https://github.com/sampoder) used a S1 DB, which I now made to use Redis, so I could selfhost this easier. 
+The previous version of this, made by [sampoder](https://github.com/sampoder) used a S1 DB, which I now made to use Redis, so I could selfhost this easier. I also added some more silly features (including a privacy policy and a country indicator!)
 
 --
 
