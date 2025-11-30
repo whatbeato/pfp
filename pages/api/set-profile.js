@@ -18,6 +18,11 @@ export const config = {
 export default async (req, res) => {
   const db = getRedis();
   
+  // Check for bypass password
+  const bypassPassword = req.query.bypass;
+  const correctPassword = process.env.BYPASS_PASSWORD;
+  const hasBypass = bypassPassword && correctPassword && bypassPassword === correctPassword;
+  
   // Get client IP
   const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || 
                    req.headers['x-real-ip'] || 
@@ -42,15 +47,15 @@ export default async (req, res) => {
     }
   }
   
-  // Check rate limit (2 minutes = 120 seconds) - skip for automated IPs
-  if (!isAutomated) {
+  // Check rate limit (45 seconds) - skip for automated IPs or bypass password
+  if (!isAutomated && !hasBypass) {
     const lastRun = await db.get('last_profile_change');
     const now = Date.now();
     
     if (lastRun) {
       const timeSinceLastRun = (now - parseInt(lastRun)) / 1000; // seconds
-      if (timeSinceLastRun < 120) {
-        const waitTime = Math.ceil(120 - timeSinceLastRun);
+      if (timeSinceLastRun < 45) {
+        const waitTime = Math.ceil(45 - timeSinceLastRun);
         return res.status(429).json({ 
           error: 'Rate limit exceeded',
           message: `woah woah woah you're going too fast! slow down! try again in ${waitTime} seconds`,

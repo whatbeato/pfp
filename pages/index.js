@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 
 export default function Home() {
   const [lastLocation, setLastLocation] = useState(null);
+  const [password, setPassword] = useState('');
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
 
   useEffect(() => {
     fetch('/api/last-changer')
@@ -11,6 +13,13 @@ export default function Home() {
       .then(data => setLastLocation(data.location))
       .catch(() => setLastLocation(null));
   }, []);
+
+  const handleBypassSubmit = (e) => {
+    e.preventDefault();
+    if (password) {
+      window.location.href = `/api/set-profile?bypass=${encodeURIComponent(password)}`;
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -43,6 +52,70 @@ export default function Home() {
             <h3>change my pfp &rarr;</h3>
             <p>changes my pfp on the hack club slack, have fun with it!</p>
           </a>
+        </div>
+        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+          {!showPasswordInput ? (
+            <button 
+              onClick={() => setShowPasswordInput(true)}
+              style={{
+                background: 'transparent',
+                border: '1px solid #333',
+                color: '#888',
+                padding: '0.5rem 1rem',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontSize: '0.9rem'
+              }}
+            >
+              bypass rate limit?
+            </button>
+          ) : (
+            <form onSubmit={handleBypassSubmit} style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}>
+              <input
+                type="password"
+                placeholder="enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  background: '#252525',
+                  border: '1px solid #333',
+                  color: '#e0e0e0',
+                  padding: '0.5rem',
+                  borderRadius: '5px',
+                  fontSize: '0.9rem'
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  background: '#ec3750',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                go
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPasswordInput(false)}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #333',
+                  color: '#888',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                cancel
+              </button>
+            </form>
+          )}
         </div>
       </main>
       <footer className={styles.footer}>
