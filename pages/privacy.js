@@ -16,17 +16,19 @@ export default function Privacy() {
           <h2>what we collect</h2>
           <p>when you use this service to change my pfp, we collect:</p>
           <ul>
-            <li>your ip address (to determine your country)</li>
+            <li>your ip address (to determine your country and for rate limiting)</li>
             <li>your country location</li>
             <li>your isp (internet service provider)</li>
+            <li>a cookie to track your daily usage</li>
           </ul>
 
           <h2>how we use your data</h2>
           <p>we use this information to:</p>
           <ul>
             <li>display which country the last person was from</li>
-            <li>rate limit requests (2 minutes between changes)</li>
+            <li>rate limit requests (45 seconds between changes, 150 changes per day)</li>
             <li>log changes for monitoring purposes</li>
+            <li>prevent abuse of the service</li>
           </ul>
 
           <h2>what we don't do</h2>
@@ -38,7 +40,10 @@ export default function Privacy() {
           </ul>
 
           <h2>data retention</h2>
-          <p>we only store your country location temporarily in our database. your ip address is only used during the request and is not saved.</p>
+          <p>we only store your country location temporarily in our database. your ip address is only used during the request and is not saved. the cookie we set persists for 1 year to track your daily usage count.</p>
+
+          <h2>cookies</h2>
+          <p>we use a single cookie called <code>user_id</code> to track your daily request count. this cookie does not contain any personal information and is only used for rate limiting purposes.</p>
 
           <h2>logging</h2>
           <p>we log profile picture changes to our server logs for monitoring purposes. these logs include the filename, country, and isp. server logs are only accessible by the site owner and are not shared publicly.</p>
